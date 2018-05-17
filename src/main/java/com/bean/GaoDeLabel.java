@@ -8,6 +8,20 @@ public class GaoDeLabel {
     private Object baseX;
     private Object baseY;
     
+    public Object getCatagroy() {
+        return catagroy;
+    }
+    
+    public void setCatagroy(Object catagroy) {
+        this.catagroy = catagroy;
+    }
+    
+    private Object catagroy;
+    private static String[] poicatagroies;
+    static {
+        poicatagroies = "住宿,餐饮,购物,风景名胜,交通设施,金融保险,科教文化,生活服务,医疗保健,休闲体育,公共设施,商务住宅,政府机构及社会团体,摩托车服务,汽车服务,通行设施,地铁站,道路附属设施,地名,其他".split(",");
+    
+    }
     public Object getPoiType() {
         return poiType;
     }
@@ -31,6 +45,20 @@ public class GaoDeLabel {
 
 
     private Object labels;
+    
+    public Object getCode() {
+        return code;
+    }
+    
+    public void setCode(Object code) {
+        this.code = code;
+        
+        if(code != null ){
+            this.setCatagroy(poicatagroies[Integer.parseInt(code.toString())]);
+        }
+    }
+    
+    private Object code;
 
 
     private Object fillStyle;
