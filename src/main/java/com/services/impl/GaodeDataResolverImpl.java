@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Hashtable;
+import java.util.Map;
 
 @Service
 public class GaodeDataResolverImpl implements GaodeDataResolver {
@@ -21,6 +23,56 @@ public class GaodeDataResolverImpl implements GaodeDataResolver {
     
     public final String ToJson(Object obj) {
         return com.alibaba.fastjson.JSON.toJSONString(obj);
+    }
+    
+    static Map<String, String> roadMap = new Hashtable<String, String>();
+    static Map<String, String> regionMap = new Hashtable<>();
+    
+    public static String getRegionCatagroy(Object code){
+        if(regionMap.containsKey(code)){
+            return regionMap.get(code);
+        }
+        return null;
+    }
+    public static String getRoadCatagroy(Object code){
+        if(roadMap.containsKey(code)){
+            return roadMap.get(code);
+        }
+        return null;
+    }
+    
+    static {
+        roadMap.put("roads:guideBoards", "道路标牌");
+        roadMap.put("roads:roadsBeingBuilt", "在建道路");
+        roadMap.put("roads:railway", "铁路");
+        roadMap.put("roads:highWay", "高速公路");
+        roadMap.put("roads:highSpeedRailway", "高铁");
+        roadMap.put("roads:nationalRoad", "国道");
+        roadMap.put("roads:ringRoad", "城市环线");
+        roadMap.put("roads:subway", "地铁");
+        roadMap.put("roads:secondaryRoad", "二级公路");
+        roadMap.put("roads:levelThreeRoad", "三级公路");
+        roadMap.put("roads:provincialRoad", "省道");
+        roadMap.put("roads:other", "其他线路");
+        roadMap.put("roads:levelFourRoad", "四级公路");
+        roadMap.put("roads:subwayBeingBuilt", "在建地铁");
+        roadMap.put("roads:overPass", "天桥");
+        roadMap.put("roads:underPass", "地道");
+    
+    
+        regionMap.put("", "陆地");
+        regionMap.put("regions:green", "绿地");
+        regionMap.put("regions:edu", "教育体育");
+        regionMap.put("regions:public", "公共设施");
+        regionMap.put("regions:traffic", "交通枢纽");
+        regionMap.put("regions:scenicSpot", "景区");
+        regionMap.put("regions:culture", "文化");
+        regionMap.put("regions:health", "医疗卫生");
+        regionMap.put("regions:sports", "运动场所");
+        regionMap.put("regions:business", "商业场所");
+        regionMap.put("regions:parkingLot", "停车场");
+        regionMap.put("regions:subway", "地铁设施");
+        regionMap.put("water","水系");
     }
     
     public JSONObject covertGaodeToNPGIS(String result, int zoom, int row, int col) {
@@ -106,6 +158,36 @@ public class GaodeDataResolverImpl implements GaodeDataResolver {
                                     
                                     if (!"roadlabel".equals(m.toString()) && "labels:pois".equals(labels.toString())) {
                                         O.setCode(p.get(5));
+                                    } else {
+                                        String temp = "";
+                                        switch (labels.toString()) {
+                                            case "labels:city":
+                                                temp = "城市";
+                                                break;
+                                            case "labels:aois":
+                                                temp = "区域标注";
+                                                break;
+                                            case "labels:district":
+                                                temp = "区县";
+                                                break;
+                                            case "labels:town":
+                                                temp = "乡镇";
+                                                break;
+                                            case "labels:village":
+                                                temp = "村庄";
+                                                break;
+                                            case "water":
+                                                temp = "水系";
+                                                break;
+                                            default:
+                                                if (roadMap.containsKey(labels.toString())) {
+                                                    temp = roadMap.get(labels.toString());
+                                                }
+                                                break;
+                                        }
+                                        
+                                        O.setCode(labels);
+                                        O.setCatagroy(temp);
                                     }
                                     
                                     O.setfillStyle(fillStyle);
@@ -116,7 +198,7 @@ public class GaodeDataResolverImpl implements GaodeDataResolver {
                                     }
                                     labelData.add(O);
                                 }
-                               // break;
+                                // break;
                         }
                     }
                     

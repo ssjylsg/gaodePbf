@@ -1,6 +1,7 @@
 package com.bean;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class GaoDeLabel {
     private Object name;
@@ -49,11 +50,14 @@ public class GaoDeLabel {
     public Object getCode() {
         return code;
     }
-    
+    private static boolean isInteger(String str) {
+        Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
+        return pattern.matcher(str).matches();
+    }
     public void setCode(Object code) {
         this.code = code;
         
-        if(code != null ){
+        if(code != null && isInteger(code.toString())){
             this.setCatagroy(poicatagroies[Integer.parseInt(code.toString())]);
         }
     }

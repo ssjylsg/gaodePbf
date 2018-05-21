@@ -17,9 +17,10 @@ import static java.lang.Integer.parseInt;
 
 @Service
 public class GaodeServiceImpl implements GaodeService {
-    public void setLAYERNAME_LABEL(boolean LAYERNAME_LABEL){
+    public void setLAYERNAME_LABEL(String LAYERNAME_LABEL) {
         this.LAYERNAME_LABEL = LAYERNAME_LABEL;
     }
+    
     public void parseBuildingRoad(JSONObject region_building_road, VectorTileEncoder vte) {
         JSONArray region = (JSONArray) com.alibaba.fastjson.JSONObject.parse(region_building_road.getString("region"));
         JSONArray road = (JSONArray) com.alibaba.fastjson.JSONObject.parse(region_building_road.getString("road"));
@@ -28,11 +29,11 @@ public class GaodeServiceImpl implements GaodeService {
         parseRoad(road, vte);
         parseBulid(building, vte);
     }
-
+    
     private void parseBulid(JSONArray building, VectorTileEncoder vte) {
-
+        
         for (int i = 0; i < building.size(); i++) {
-
+            
             java.util.Map<String, Object> attributes = new HashMap<>();
             JSONObject line = building.getJSONObject(i);
             JSONArray roads = line.getJSONArray("buildings");
@@ -45,13 +46,15 @@ public class GaodeServiceImpl implements GaodeService {
             attributes.put("fillStyle1", style.getString(3));
             attributes.put("fillStyle2", style.getString(4));
             attributes.put("fill-extrusion-height", line.getDouble("offset") / 8.0);
-            attributes.put("fill-extrusion-base", line.getDouble("offset")  / 9.0 );
+            attributes.put("fill-extrusion-base", line.getDouble("offset") / 9.0);
             Geometry geometry = factory.createMultiPolygon(lines);
             attributes.put("labels", line.getString("labels"));
+            attributes.put("code", line.get("code"));
+            attributes.put("catagroy", line.get("catagroy"));
             vte.addFeature(this.getLayerName("building", line), attributes, geometry);
         }
     }
-
+    
     private void createPolygon(GeometryFactory factory, JSONArray roads, Polygon[] lines) {
         for (int j = 0; j < roads.size(); j++) {
             JSONArray location = roads.getJSONArray(j);
@@ -63,17 +66,17 @@ public class GaodeServiceImpl implements GaodeService {
             lines[j] = factory.createPolygon(points);
         }
     }
-
+    
     private String[] getRgbaColor(String rgba) {
         if (rgba == null || rgba.equals("")) {
             return new String[0];
         }
         return rgba.replace("rgba(", "").replace(")", "").split(",");
     }
-
+    
     private int scale = 16;
     private GeometryFactory factory = new GeometryFactory();
-
+    
     /**
      * 道路解析
      *
@@ -84,7 +87,7 @@ public class GaodeServiceImpl implements GaodeService {
         java.util.Map<String, Object> attributes;
         String layerName;
         for (int i = 0; i < road.size(); i++) {
-
+            
             JSONObject line = road.getJSONObject(i);
             if ("roads:other".equals(line.getString("labels"))) {
                 continue;
@@ -99,17 +102,17 @@ public class GaodeServiceImpl implements GaodeService {
                 }
                 lines[j] = factory.createLineString(points);
             }
-
+            
             attributes = new HashMap<>();
-
+            
             JSONArray style = line.getJSONArray("style");
             if (style != null && style.size() > 0 && !style.getString(5).equals("")) {
                 String[] lineCaps = style.getString(5).split("_");
                 if (lineCaps.length != 0) {
-
+                    
                     attributes.put("fillStyle", line.getString("fillStyle"));
                     attributes.put("width", style.getDouble(3) + style.getDouble(0));
-
+                    
                     String lineCap = "butt";
                     if (lineCaps.length >= 2) {
                         lineCap = lineCaps[1].replace("cap", "");
@@ -120,22 +123,23 @@ public class GaodeServiceImpl implements GaodeService {
                         int dashLength = parseInt(lineCaps[0].split(",")[1].replace(")", ""));
                         dash = dashLength;
                     }
-
+                    
                     attributes.put("line-dasharray", dash);
                     attributes.put("labels", line.getString("labels"));
                     attributes.put("line-join", "round");
                     attributes.put("type", line.getString("type"));
-
+                    attributes.put("code", line.get("code"));
+                    attributes.put("catagroy", line.get("catagroy"));
                     Geometry geometry = factory.createMultiLineString(lines);
                     layerName = getDashRoadLayerName(line, dash);
                     vte.addFeature(layerName, attributes, geometry);
                 }
             }
-
+            
             attributes = new HashMap<>();
             attributes.put("fillStyle", line.getString("strokeStyle"));
             attributes.put("width", style.getDouble(0));
-
+            
             String[] lineStyle = style.getString(2).split("_");
             String lineCap;
             if (lineStyle.length >= 2) {
@@ -152,31 +156,33 @@ public class GaodeServiceImpl implements GaodeService {
             }
             layerName = getDashRoadLayerName(line, dash);
             attributes.put("line-dasharray", new double[]{dash, dash});
-
+            
             Geometry geometry = factory.createMultiLineString(lines);
             attributes.put("labels", line.getString("labels"));
             attributes.put("type", line.getString("type"));
+            attributes.put("code", line.get("code"));
+            attributes.put("catagroy", line.get("catagroy"));
             vte.addFeature(layerName, attributes, geometry);
-
+            
         }
     }
-
+    
     private String getDashRoadLayerName(JSONObject line, double dash) {
         String layerName;
         if (dash != 0) {
-            if(dash != 6 && dash != 12)
+            if (dash != 6 && dash != 12)
                 System.out.println(dash);
-            layerName = String.join("_", new String[]{"road", "dash", Integer.toString((int)dash)});
+            layerName = String.join("_", new String[]{"road", "dash", Integer.toString((int) dash)});
         } else {
             layerName = this.getLayerName("road", line);
         }
         return layerName;
     }
-
+    
     private void parseRegion(JSONArray region, VectorTileEncoder vte) {
         for (int i = 0; i < region.size(); i++) {
-
-            java.util.Map<String, String> attributes = new HashMap<>();
+            
+            java.util.Map<String, Object> attributes = new HashMap<>();
             JSONObject line = region.getJSONObject(i);
             JSONArray roads = line.getJSONArray("regions");
             Polygon[] lines = new Polygon[roads.size()];
@@ -184,10 +190,12 @@ public class GaodeServiceImpl implements GaodeService {
             attributes.put("style", line.getJSONArray("style").getString(0));
             Geometry geometry = factory.createMultiPolygon(lines);
             attributes.put("labels", line.getString("labels"));
+            attributes.put("code", line.get("code"));
+            attributes.put("catagroy", line.get("catagroy"));
             vte.addFeature(this.getLayerName("region", line), attributes, geometry);
         }
     }
-
+    
     private void addPoiExtent(String bgColor, String text, String font, int fontSize, double x, double y, VectorTileEncoder vte) {
         if (bgColor != null && !bgColor.equals("")) {
             x = x * scale;
@@ -197,7 +205,7 @@ public class GaodeServiceImpl implements GaodeService {
             FontMetrics fm = sun.font.FontDesignMetrics.getMetrics(f);
             double width = fm.stringWidth(text) * scale * 2;
             double height = fm.getHeight() * scale * 2;
-
+            
             Geometry geometry = this.factory.createPolygon(new Coordinate[]{
                     new Coordinate(x, y),
                     new Coordinate(x, y + height),
@@ -210,12 +218,12 @@ public class GaodeServiceImpl implements GaodeService {
             vte.addFeature("poi_gb", attributes, geometry);
         }
     }
-
+    
     private String fontFamily = "SimHei";
-
+    
     private void parsePoi(JSONArray poilabel, VectorTileEncoder vte) {
         java.util.Map<String, Object> attributes = null;
-
+        
         for (Object aPoilabel : poilabel) {
             JSONObject poi = (JSONObject) aPoilabel;
             JSONArray names = poi.getJSONArray("name");
@@ -231,7 +239,7 @@ public class GaodeServiceImpl implements GaodeService {
                 attributes = new HashMap<>();
                 attributes.put("name", names.getString(j));
                 nameList[j] = names.getString(j);
-
+                
                 JSONArray location = poi.getJSONArray("location");
                 if (location != null) {
                     JSONArray index = location.getJSONArray(j);
@@ -248,6 +256,8 @@ public class GaodeServiceImpl implements GaodeService {
                     this.addPoiExtent(bgColor, names.getString(j), fontFamily, index.getInteger(3), x, y, vte);
                     attributes.put("labels", poi.getString("labels"));
                     attributes.put("poiType", poi.getString("poiType"));
+                    attributes.put("code", poi.getString("code"));
+                    attributes.put("catagroy", poi.getString("catagroy"));
                     vte.addFeature(getLayerName("poi", poi), attributes, geom);
                 } else if (j == names.size() - 1) {
                     this.parsePoiImg(poi, vte, baseX, baseY, getLayerName("poi", poi));
@@ -255,9 +265,8 @@ public class GaodeServiceImpl implements GaodeService {
             }
         }
     }
-
+    
     /**
-     *
      * @param poi
      * @param attributes
      */
@@ -270,16 +279,50 @@ public class GaodeServiceImpl implements GaodeService {
             attributes.put("icon-image", image);
         }
     }
-
-    private boolean LAYERNAME_LABEL = false;
-
+    
+    private String LAYERNAME_LABEL = "default";
+    
+//    private String getLayerName(String defaultName, JSONObject object) {
+//        if (LAYERNAME_LABEL) {
+//            return defaultName;
+//        }
+//        return object.getString("labels");
+//    }
+    
     private String getLayerName(String defaultName, JSONObject object) {
-        if (LAYERNAME_LABEL) {
+        if (LAYERNAME_LABEL.equalsIgnoreCase("default") ||
+                LAYERNAME_LABEL.equalsIgnoreCase("true")) {
             return defaultName;
         }
-        return object.getString("labels");
+        String labels = object.getString("labels");
+        if (LAYERNAME_LABEL.equalsIgnoreCase("false")){
+            return labels;
+        }
+        
+        switch (defaultName){
+            case "region":
+                if(labels.equalsIgnoreCase("water")){
+                    return "water";
+                }
+                return  "region";
+            case "road_label":
+                if(labels.equalsIgnoreCase("water")){
+                    return "water_label";
+                }
+                return  defaultName;
+            case "poi":
+                if(labels.equalsIgnoreCase("labels:pois")){
+                    return defaultName;
+                }
+                return "labels";
+            case "road":
+                return defaultName;
+            case "building":
+                return "building";
+        }
+        return labels;
     }
-
+    
     private void parsePoiImg(JSONObject poi, VectorTileEncoder vte, double baseX, double baseY, String layerName) {
         JSONArray lbs = poi.getJSONArray("lb");
         if (lbs != null && lbs.size() > 0) {
@@ -296,16 +339,16 @@ public class GaodeServiceImpl implements GaodeService {
             }
         }
     }
-
+    
     public void parseLimg(JSONObject obj, VectorTileEncoder vte) {
         JSONArray poilabel = (JSONArray) com.alibaba.fastjson.JSONObject.parse(obj.getString("poilabel"));
         JSONArray roadlabel = (JSONArray) com.alibaba.fastjson.JSONObject.parse(obj.getString("roadlabel"));
-
+        
         parsePoi(poilabel, vte);
         parseRoadLabel(roadlabel, vte);
-
+        
     }
-
+    
     private void parseRoadLabel(JSONArray roadlabel, VectorTileEncoder vte) {
         for (Object aRoadlabel : roadlabel) {
             JSONObject poi = (JSONObject) aRoadlabel;
@@ -325,13 +368,13 @@ public class GaodeServiceImpl implements GaodeService {
                     x = baseX * scale + index.getDouble(0);
                     y = baseY * scale + index.getDouble(1);
                     geom = factory.createPoint(new Coordinate(x, y));
-
+                    
                 } else {
                     x = baseX * scale;// + poi.getDouble("location");
                     y = baseY * scale + 5;
                     geom = factory.createPoint(new Coordinate(x, y));
                 }
-
+                
                 if (j == names.size() - 1) {
                     this.addPoiImage(poi, attributes);
                 }
@@ -341,8 +384,9 @@ public class GaodeServiceImpl implements GaodeService {
                 attributes.put("text_color", fillStyle);
                 attributes.put("type", poi.getString("type"));
                 attributes.put("poiType", poi.getString("poiType"));
-                //this.getLayerName("road_label",poi)
-                vte.addFeature("road_label", attributes, geom);
+                
+                
+                vte.addFeature(this.getLayerName("road_label",poi), attributes, geom);
             }
         }
     }

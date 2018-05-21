@@ -46,7 +46,7 @@ public class Spatials {
     
     @CrossOrigin(origins = "*", maxAge = 3600, methods = {RequestMethod.GET})
     @RequestMapping(value = "/gaodeMap/{label}/{z}/{x}/{y}", produces = "application/x-protobuf")
-    public byte[] gaodeMap(@PathVariable int x, @PathVariable int y, @PathVariable int z, @PathVariable boolean label) throws IOException {
+    public byte[] gaodeMap(@PathVariable int x, @PathVariable int y, @PathVariable int z, @PathVariable String label) throws IOException {
         String file = gaodeMapTile + File.separator + z + File.separator + x + File.separator + y + ".json";
         if (!new File(file).exists()) {
             return new byte[0];
@@ -71,8 +71,8 @@ public class Spatials {
     
     @CrossOrigin(origins = "*", maxAge = 3600, methods = {RequestMethod.GET})
     @RequestMapping(value = "/gaodeproxy/{label}/{z}/{x}/{y}", produces = "application/x-protobuf")
-    public byte[] gaodeProxy(@PathVariable int x, @PathVariable int y, @PathVariable int z, @PathVariable boolean label) throws ExecutionException, InterruptedException {
-        byte[] buffer = readCache(z, x, y);
+    public byte[] gaodeProxy(@PathVariable int x, @PathVariable int y, @PathVariable int z, @PathVariable String label) throws ExecutionException, InterruptedException {
+        byte[] buffer = readCache(z, x, y,label);
         if (buffer != null) {
             return buffer;
         }
@@ -98,7 +98,7 @@ public class Spatials {
                         gaodeService.parseLimg(json.getJSONObject("limg"), vte);
                         gaodeService.parseBuildingRoad(json.getJSONObject("region_building_road"), vte);
                         byte[] buffer = vte.encode();
-                        cacheVectorTile(buffer, z, x, y);
+                        cacheVectorTile(buffer, z, x, y,label);
                         return buffer;
                     }
                 } catch (IOException e) {
@@ -119,9 +119,16 @@ public class Spatials {
     
     private String cacheFile = "C:\\Users\\Administrator\\Desktop\\gaode\\buffer";
     
-    private byte[] readCache(int z, int x, int y) {
+    private byte[] readCache(int z, int x, int y,String label) {
         //System.out.println(Spatials.class.getClass().getResource("/").getPath() + System.getProperty("user.dir"));
-        String file = cacheFile + File.separator + z + File.separator + x + File.separator + y + ".pbf";
+        String file = String.join(File.separator,new String[]{
+                cacheFile,
+                label,
+                Integer.toString(z),
+                Integer.toString(x),
+                Integer.toString(y)
+        })+".pbf";
+        
         File fileInfo = new File(file);
         if (fileInfo.exists()) {
             byte[] buffer = null;
@@ -138,14 +145,25 @@ public class Spatials {
         return null;
     }
     
-    private void cacheVectorTile(byte[] buffer, int z, int x, int y) {
-        String file = cacheFile + File.separator + z + File.separator + x + File.separator + y + ".pbf";
+    private void cacheVectorTile(byte[] buffer, int z, int x, int y,String label) {
+        String file = String.join(File.separator,new String[]{
+                cacheFile,
+                label,
+                Integer.toString(z),
+                Integer.toString(x),
+                Integer.toString(y)
+        })+".pbf";
         File fileInfo = new File(file);
         if (fileInfo.exists()) {
             return;
         } else {
             try {
-                String temp = cacheFile + File.separator + z + File.separator + x;
+                String temp = String.join(File.separator,new String[]{
+                        cacheFile,
+                        label,
+                        Integer.toString(z),
+                        Integer.toString(x)
+                });
                 File tempFileInfo = new File(temp);
                 if (!tempFileInfo.exists()) {
                     tempFileInfo.mkdirs();
