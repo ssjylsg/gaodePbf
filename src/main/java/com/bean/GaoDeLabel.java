@@ -20,7 +20,9 @@ public class GaoDeLabel {
     private Object catagroy;
     private static String[] poicatagroies;
     static {
-        poicatagroies = "住宿,餐饮,购物,风景名胜,交通设施,金融保险,科教文化,生活服务,医疗保健,休闲体育,公共设施,商务住宅,政府机构及社会团体,摩托车服务,汽车服务,通行设施,地铁站,道路附属设施,地名,其他".split(",");
+        poicatagroies = ("住宿,餐饮,购物,风景名胜,交通设施,金融保险,科教文化,生活服务,医疗保健,休闲体育," +
+                "公共设施,商务住宅,政府机构及社会团体,摩托车服务,汽车服务,通行设施,地铁站," +
+                "道路附属设施,地名,其他").split(",");
     
     }
     public Object getPoiType() {

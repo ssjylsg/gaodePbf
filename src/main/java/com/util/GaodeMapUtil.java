@@ -15,7 +15,7 @@ public class GaodeMapUtil {
     }
 
     /**
-     * z y x 格式化URL
+     * 高德地图URL 加密
      *
      * @param h z
      * @param l y

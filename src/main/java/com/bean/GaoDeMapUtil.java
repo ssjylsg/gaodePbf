@@ -140,6 +140,11 @@ public class GaoDeMapUtil {
         return new double[]{b.get(1), b.get(2), b.get(3), b.get(0)};
     }
     
+    /**
+     * 颜色解析
+     * @param s
+     * @return
+     */
     public final String getRgb(String s) {
         if (s.equals("") || s.length() == 1) {
             return null;

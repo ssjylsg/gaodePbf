@@ -4,7 +4,7 @@
 
 	<groupId>com.netposa.npgisServer</groupId>
 	<artifactId>npgis-server</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.5.0</version>
 	<packaging>jar</packaging>
 
 	<name>npgis-server</name>
@@ -16,20 +16,11 @@
 		<version>1.5.0.RELEASE</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-
-	<!--<repositories>-->
-		<!--<repository>-->
-			<!--<id>ECC</id>-->
-			<!--<url>https://github.com/ElectronicChartCentre/ecc-mvn-repo/raw/master/releases</url>-->
-		<!--</repository>-->
-	<!--</repositories>-->
-
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
 	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -40,13 +31,6 @@
 			<artifactId>spring-boot-starter-freemarker</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>jquery</artifactId>
-			<version>2.1.4</version>
-		</dependency>
-
-		<!-- 数据库 -->
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
@@ -54,73 +38,58 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-tomcat</artifactId>
-			<!--<scope>provided</scope>-->
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>42.1.1</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>com.vividsolutions</groupId>
 			<artifactId>jts</artifactId>
 			<version>1.13</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java</artifactId>
 			<version>2.6.1</version>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/com.google.protobuf.nano/protobuf-javanano -->
 		<dependency>
 			<groupId>com.google.protobuf.nano</groupId>
 			<artifactId>protobuf-javanano</artifactId>
 			<version>3.0.0-alpha-4</version>
 		</dependency>
-
-		<!-- http://repo.boundlessgeo.com/main/ -->
 		<dependency>
 			<groupId>no.ecc.vectortile</groupId>
 			<artifactId>java-vector-tile</artifactId>
 			<version>1.2.1</version>
-			<!-- 1.2.1-->
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
 			<version>1.2.47</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>okhttp</artifactId>
 			<version>3.10.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>druid-spring-boot-starter</artifactId>
 			<version>1.1.6</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.springframework/spring-aop -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aop</artifactId>
 			<version>5.0.5.RELEASE</version>
 		</dependency>
-
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>

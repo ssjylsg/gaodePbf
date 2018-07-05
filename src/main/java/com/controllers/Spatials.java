@@ -94,6 +94,7 @@ public class Spatials {
                     if (response.isSuccessful()) {
                         msg = new String(response.body().bytes(), "UTF-8");
                         JSONObject json = resolver.covertGaodeToNPGIS(msg, z, x, y);
+                        cacheJsonTile(json.toJSONString(),z,x,y,label);
                         VectorTileEncoder vte = new VectorTileEncoder(4096, 16, false);
                         gaodeService.parseLimg(json.getJSONObject("limg"), vte);
                         gaodeService.parseBuildingRoad(json.getJSONObject("region_building_road"), vte);
@@ -118,6 +119,7 @@ public class Spatials {
     }
     
     private String cacheFile = "C:\\Users\\Administrator\\Desktop\\gaode\\buffer";
+    private String jsonCacheFile = "C:\\Users\\Administrator\\Desktop\\gaode\\s";
     
     private byte[] readCache(int z, int x, int y,String label) {
         //System.out.println(Spatials.class.getClass().getResource("/").getPath() + System.getProperty("user.dir"));
@@ -190,5 +192,51 @@ public class Spatials {
             }
         }
         
+    }
+    
+    private void cacheJsonTile(String json,int z, int x, int y,String label){
+        String file = String.join(File.separator,new String[]{
+                jsonCacheFile,
+                label,
+                Integer.toString(z),
+                Integer.toString(x),
+                Integer.toString(y)
+        })+".json";
+        File fileInfo = new File(file);
+        if (fileInfo.exists()) {
+            return;
+        } else {
+            try {
+                String temp = String.join(File.separator,new String[]{
+                        jsonCacheFile,
+                        label,
+                        Integer.toString(z),
+                        Integer.toString(x)
+                });
+                File tempFileInfo = new File(temp);
+                if (!tempFileInfo.exists()) {
+                    tempFileInfo.mkdirs();
+                }
+                fileInfo.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+        DataOutputStream fw = null;
+        try {
+            fw = new DataOutputStream(new FileOutputStream(file));
+            fw.write(json.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fw != null) {
+                try {
+                    fw.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }
